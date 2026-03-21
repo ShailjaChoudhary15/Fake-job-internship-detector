@@ -46,14 +46,21 @@ def run_rf():
     print(classification_report(y_test, predictions, target_names=["Real Job", "Fake Job"]))
 
     cm = confusion_matrix(y_test, predictions)
-    plt.figure()
-    plt.imshow(cm, cmap='Reds')
-    plt.title("Random Forest - Confusion Matrix")
+    plt.figure(figsize=(6, 5))
+    plt.imshow(cm, cmap='Reds', interpolation='nearest')
+    plt.title("Random Forest - Confusion Matrix", fontsize=14)
     plt.colorbar()
-    plt.xlabel("Predicted")
-    plt.ylabel("Actual")
+    plt.xticks([0, 1], ["Real Job", "Fake Job"])
+    plt.yticks([0, 1], ["Real Job", "Fake Job"])
+    plt.xlabel("Predicted", fontsize=12)
+    plt.ylabel("Actual", fontsize=12)
+    for i in range(2):
+        for j in range(2):
+            plt.text(j, i, str(cm[i, j]),
+                     ha="center", va="center",
+                     color="white" if cm[i, j] > cm.max()/2 else "black",
+                     fontsize=14, fontweight='bold')
     plt.tight_layout()
     plt.show()
 
     return acc
-
