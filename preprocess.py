@@ -7,14 +7,13 @@ def load_and_preprocess():
 
     if not os.path.exists(file_path):
         print("Dataset not found at:", file_path)
+        print("Please place fake_job_postings.csv inside the 'data' folder.")
         exit()
 
     df = pd.read_csv(file_path)
-
     df = df.fillna('')
     df['text'] = df['title'] + " " + df['description']
 
     X = df['text']
     y = df['fraudulent']
-
     return X, y
