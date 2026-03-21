@@ -3,10 +3,14 @@ import os
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report
 
 def run_svm():
+    print("\n" + "-" * 40)
+    print("  Running SVM Model...")
+    print("  (This may take 2-3 minutes)")
+    print("-" * 40)
+
     base_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(base_dir, "data", "fake_job_postings.csv")
 
@@ -24,14 +28,17 @@ def run_svm():
         X_vec, y, test_size=0.2, random_state=42
     )
 
-    model = SVC(class_weight='balanced')
+    model = SVC(class_weight='balanced', random_state=42)
     model.fit(X_train, y_train)
-
     y_pred = model.predict(X_test)
 
-    print("\nSVM RESULTS")
-    print("Accuracy:", accuracy_score(y_test, y_pred))
-    print("Precision:", precision_score(y_test, y_pred))
-    print("Recall:", recall_score(y_test, y_pred))
-    print("F1 Score:", f1_score(y_test, y_pred))
-    
+    acc = accuracy_score(y_test, y_pred)
+
+    print(f"  Accuracy  : {acc:.4f}")
+    print(f"  Precision : {precision_score(y_test, y_pred):.4f}")
+    print(f"  Recall    : {recall_score(y_test, y_pred):.4f}")
+    print(f"  F1 Score  : {f1_score(y_test, y_pred):.4f}")
+    print("\nClassification Report:")
+    print(classification_report(y_test, y_pred, target_names=["Real Job", "Fake Job"]))
+
+    return acc
