@@ -11,12 +11,16 @@ def run_nb():
     print("  Running Naive Bayes Model...")
     print("-" * 40)
 
-    base_dir = os.path.dirname(os.path.abspath(__file__))
+    base_dir = os.path.dirname(os.path.abspath(_file_))
     file_path = os.path.join(base_dir, "data", "fake_job_postings.csv")
 
     df = pd.read_csv(file_path)
     df = df.fillna('')
-    df['text'] = df['title'] + " " + df['description']
+    df['text'] = (df['title'] + " " +
+                  df['description'] + " " +
+                  df['company_profile'] + " " +
+                  df['requirements'] + " " +
+                  df['benefits'])
 
     X = df['text']
     y = df['fraudulent']
@@ -28,7 +32,7 @@ def run_nb():
         X_vec, y, test_size=0.2, random_state=42
     )
 
-    model = MultinomialNB()
+    model = MultinomialNB(class_prior=[0.3, 0.7])
     model.fit(X_train, y_train)
     pred = model.predict(X_test)
 
@@ -42,12 +46,12 @@ def run_nb():
     print(classification_report(y_test, pred, target_names=["Real Job", "Fake Job"]))
 
     cm = confusion_matrix(y_test, pred)
-    plt.figure(figsize=(6, 5))
-    plt.imshow(cm, cmap='Blues', interpolation='nearest')
+    plt.figure(figsize=(6, 6))
+    plt.imshow(cm, cmap='Blues', interpolation='nearest', aspect='auto')
     plt.title("Naive Bayes - Confusion Matrix", fontsize=14)
     plt.colorbar()
-    plt.xticks([0, 1], ["Real Job", "Fake Job"])
-    plt.yticks([0, 1], ["Real Job", "Fake Job"])
+    plt.xticks([0, 1], ["Real Job", "Fake Job"], fontsize=11)
+    plt.yticks([0, 1], ["Real Job", "Fake Job"], fontsize=11)
     plt.xlabel("Predicted", fontsize=12)
     plt.ylabel("Actual", fontsize=12)
     for i in range(2):
@@ -55,7 +59,7 @@ def run_nb():
             plt.text(j, i, str(cm[i, j]),
                      ha="center", va="center",
                      color="white" if cm[i, j] > cm.max()/2 else "black",
-                     fontsize=14, fontweight='bold')
+                     fontsize=16, fontweight='bold')
     plt.tight_layout()
     plt.show()
 
