@@ -15,7 +15,11 @@ def run_sgd():
 
     df = pd.read_csv(file_path)
     df = df.fillna('')
-    df['text'] = df['title'] + " " + df['description']
+    df['text'] = (df['title'] + " " +
+                  df['description'] + " " +
+                  df['company_profile'] + " " +
+                  df['requirements'] + " " +
+                  df['benefits'])
 
     X = df['text']
     y = df['fraudulent']
