@@ -11,7 +11,7 @@ def run_nb():
     print("  Running Naive Bayes Model...")
     print("-" * 40)
 
-    base_dir = os.path.dirname(os.path.abspath(_file_))
+    base_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(base_dir, "data", "fake_job_postings.csv")
 
     df = pd.read_csv(file_path)
@@ -32,7 +32,7 @@ def run_nb():
         X_vec, y, test_size=0.2, random_state=42
     )
 
-    model = MultinomialNB(class_prior=[0.3, 0.7])
+    model = MultinomialNB()
     model.fit(X_train, y_train)
     pred = model.predict(X_test)
 

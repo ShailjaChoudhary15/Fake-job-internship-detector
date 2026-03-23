@@ -11,7 +11,7 @@ def run_rf():
     print("  Running Random Forest Model...")
     print("-" * 40)
 
-    base_dir = os.path.dirname(os.path.abspath(_file_))
+    base_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(base_dir, "data", "fake_job_postings.csv")
 
     df = pd.read_csv(file_path)
