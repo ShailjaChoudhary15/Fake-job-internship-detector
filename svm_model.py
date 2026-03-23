@@ -3,7 +3,7 @@ import os
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 def run_svm():
     print("\n" + "-" * 40)
@@ -42,7 +42,5 @@ def run_svm():
     print(f"  Precision : {precision_score(y_test, y_pred):.4f}")
     print(f"  Recall    : {recall_score(y_test, y_pred):.4f}")
     print(f"  F1 Score  : {f1_score(y_test, y_pred):.4f}")
-    print("\nClassification Report:")
-    print(classification_report(y_test, y_pred, target_names=["Real Job", "Fake Job"]))
 
     return acc

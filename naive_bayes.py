@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report, confusion_matrix
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 
 def run_nb():
     print("\n" + "-" * 40)
@@ -42,8 +42,6 @@ def run_nb():
     print(f"  Precision : {precision_score(y_test, pred):.4f}")
     print(f"  Recall    : {recall_score(y_test, pred):.4f}")
     print(f"  F1 Score  : {f1_score(y_test, pred):.4f}")
-    print("\nClassification Report:")
-    print(classification_report(y_test, pred, target_names=["Real Job", "Fake Job"]))
 
     cm = confusion_matrix(y_test, pred)
     plt.figure(figsize=(6, 6))
