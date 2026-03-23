@@ -4,14 +4,14 @@ import matplotlib.pyplot as plt
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report, confusion_matrix
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 
 def run_nb():
     print("\n" + "-" * 40)
     print("  Running Naive Bayes Model...")
     print("-" * 40)
 
-    base_dir = os.path.dirname(os.path.abspath(_file_))
+    base_dir = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(base_dir, "data", "fake_job_postings.csv")
 
     df = pd.read_csv(file_path)
@@ -32,7 +32,7 @@ def run_nb():
         X_vec, y, test_size=0.2, random_state=42
     )
 
-    model = MultinomialNB(class_prior=[0.3, 0.7])
+    model = MultinomialNB()
     model.fit(X_train, y_train)
     pred = model.predict(X_test)
 
@@ -42,8 +42,6 @@ def run_nb():
     print(f"  Precision : {precision_score(y_test, pred):.4f}")
     print(f"  Recall    : {recall_score(y_test, pred):.4f}")
     print(f"  F1 Score  : {f1_score(y_test, pred):.4f}")
-    print("\nClassification Report:")
-    print(classification_report(y_test, pred, target_names=["Real Job", "Fake Job"]))
 
     cm = confusion_matrix(y_test, pred)
     plt.figure(figsize=(6, 6))
