@@ -1,3 +1,4 @@
+
 registration_fee_keywords = [
     'registration fee', 'joining fee', 'joining charges',
     'advance payment', 'security deposit', 'refundable deposit',
@@ -28,7 +29,7 @@ government_job_keywords = [
     'appointment letter before interview',
     'offer letter via whatsapp',
     'government job whatsapp',
-    'sarkari result guaranteed'
+    'sarkari result guaranteed','government certified programs'
 ]
 
 work_from_home_keywords = [
@@ -95,7 +96,6 @@ visa_job_keywords = [
     'overseas placement', 'foreign placement agency',
     'consultation fee visa', 'processing charges abroad'
 ]
-
 placement_agency_keywords = [
     'placement agency', 'placement consultancy',
     'job consultancy fee', 'placement charges',
@@ -116,8 +116,8 @@ social_media_scam_keywords = [
     'dm for job details', 'message for details',
     'premium task', 'vip task', 'advance task',
     'task wallet', 'task app earning',
-    'crypto task', 'coin task', 'token earning'
-]
+    'crypto task', 'coin task', 'token earning','apply now', 'fill the form']
+
 unrealistic_salary_keywords = [
     'earn 50000 weekly', 'earn 1 lakh weekly',
     '5 lakh per month fresher', 'high salary fresher',
@@ -137,7 +137,7 @@ phishing_keywords = [
     'send personal documents', 'kyc verification fee',
     'bank account verification', 'send cancelled cheque',
     'share ifsc code', 'share account details',
-    'noc required', 'noc fee'
+    'noc required', 'noc fee',
 ]
 
 job_categories = {
@@ -194,11 +194,14 @@ job_categories = {
 
 def detect_indian_fake_job(title, description,
                             requirements='', benefits='',
-                            company='', user_field=None):
+                            company='', user_field=None,
+                            salary='',       
+                            responsibilities=''):   
 
-    text = (title + ' ' + description + ' ' +
+    text = (title + ' ' + description + ' ' +      
             requirements + ' ' + benefits + ' ' +
-            company).lower()
+            company + ' ' + salary + ' ' +
+            responsibilities).lower()
 
     results = {
         'is_fake'          : False,
@@ -211,6 +214,7 @@ def detect_indian_fake_job(title, description,
     }
 
     score = 0
+
     categories = {
         'Registration/Payment Scam'  : registration_fee_keywords,
         'Government Job Scam'        : government_job_keywords,
@@ -252,23 +256,78 @@ def detect_indian_fake_job(title, description,
                 f"but this appears to be a {job_field_found} job"
             )
             score += 2
-          
+    
+
     if score == 0:
-        results['risk_level']    = 'LOW'
-        results['recommendation']= '✅ SAFE TO APPLY'
+        results['risk_level']     = 'LOW'
+        results['recommendation'] = 'SAFE TO APPLY'
     elif score <= 2:
-        results['risk_level']    = 'MEDIUM'
-        results['is_fake']       = True
-        results['recommendation']= '⚠️ BE CAREFUL — Verify before applying'
+        results['risk_level']     = 'MEDIUM'
+        results['is_fake']        = True
+        results['recommendation'] = 'BE CAREFUL — Verify before applying'
     elif score <= 4:
-        results['risk_level']    = 'HIGH'
-        results['is_fake']       = True
-        results['recommendation']= '❌ LIKELY FAKE — Do not apply'
+        results['risk_level']     = 'HIGH'
+        results['is_fake']        = True
+        results['recommendation'] = 'LIKELY FAKE — Do not apply'
     else:
-        results['risk_level']    = 'VERY HIGH'
-        results['is_fake']       = True
-        results['recommendation']= '🚫 DEFINITELY FAKE — Do not apply'
+        results['risk_level']     = 'VERY HIGH'
+        results['is_fake']        = True
+        results['recommendation'] = 'DEFINITELY FAKE — Do not apply'
 
     return results
 
+if __name__ == "__main__":
+    print("=" * 50)
+    print("  INDIAN FAKE JOB DETECTOR")
+    print("=" * 50)
 
+    title            = input("\nEnter job title: ")
+    description      = input("Enter job description: ")
+    requirements     = input("Enter requirements (press Enter to skip): ")
+    benefits         = input("Enter benefits (press Enter to skip): ")
+    company          = input("Enter company name (press Enter to skip): ")
+    salary           = input("Enter salary (press Enter to skip): ")
+    responsibilities = input("Enter responsibilities (press Enter to skip): ")
+
+    print("\nSelect your field (press Enter to skip):")
+    fields = list(job_categories.keys())
+    for i, field in enumerate(fields, 1):
+        print(f"  {i}. {field}")
+
+    choice     = input("\nEnter choice number: ")
+    user_field = None
+    if choice.isdigit() and 1 <= int(choice) <= len(fields):
+        user_field = fields[int(choice) - 1]
+
+    result = detect_indian_fake_job(
+        title            = title,
+        description      = description,
+        requirements     = requirements,
+        benefits         = benefits,
+        company          = company,
+        salary           = salary,
+        responsibilities = responsibilities,
+        user_field       = user_field
+    )
+
+    print("\n" + "=" * 50)
+    print("  DETECTION RESULTS")
+    print("=" * 50)
+    print(f"  Risk Level     : {result['risk_level']}")
+    print(f"  Recommendation : {result['recommendation']}")
+
+    if result['scam_categories']:
+        print(f"\n  Scam Categories Found:")
+        for cat in result['scam_categories']:
+            print(f"   {cat}")
+
+    if result['red_flags']:
+        print(f"\n  Red Flags Found ({len(result['red_flags'])}):")
+        for flag in result['red_flags'][:10]:
+            print(f"   {flag}")
+
+    if result['is_irrelevant']:
+        print(f"\n  Relevance Check:")
+        print(f"   {result['irrelevant_reason']}")
+
+    print("=" * 50)
