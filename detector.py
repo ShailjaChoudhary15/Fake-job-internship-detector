@@ -210,7 +210,7 @@ def detect_indian_fake_job(title, description,
         'red_flags'        : [],
         'is_irrelevant'    : False,
         'irrelevant_reason': '',
-        'recommendation'   : '✅ SAFE TO APPLY'
+        'recommendation'   : ' SAFE TO APPLY'
     }
 
     score = 0
@@ -278,7 +278,7 @@ def detect_indian_fake_job(title, description,
 
 if __name__ == "__main__":
     print("=" * 50)
-    print("  INDIAN FAKE JOB DETECTOR")
+    print(" FAKE JOB DETECTOR")
     print("=" * 50)
 
     title            = input("\nEnter job title: ")
@@ -299,7 +299,7 @@ if __name__ == "__main__":
     if choice.isdigit() and 1 <= int(choice) <= len(fields):
         user_field = fields[int(choice) - 1]
 
-    result = detect_indian_fake_job(
+    result = detect_fake_job(
         title            = title,
         description      = description,
         requirements     = requirements,
