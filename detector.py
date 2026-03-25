@@ -192,7 +192,7 @@ job_categories = {
     ]
 }
 
-def detect_indian_fake_job(title, description,
+def detect_fake_job(title, description,
                             requirements='', benefits='',
                             company='', user_field=None,
                             salary='',       
