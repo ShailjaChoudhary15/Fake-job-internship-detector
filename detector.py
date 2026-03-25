@@ -148,7 +148,7 @@ job_categories = {
         'artificial intelligence', 'cloud', 'devops',
         'cybersecurity', 'database', 'sql', 'networking',
         'it support', 'system admin', 'software engineer',
-        'backend', 'frontend', 'fullstack', 'react', 'angular'
+        'backend', 'frontend', 'fullstack', 'react', 'angular','computer science','automation','debugging'
     ],
     'Medical / Healthcare': [
         'doctor', 'nurse', 'medical', 'pharma', 'hospital',
