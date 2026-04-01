@@ -1,3 +1,4 @@
+from ml_predict import predict_ml
 
 registration_fee_keywords = [
     'registration fee', 'joining fee', 'joining charges',
@@ -258,24 +259,6 @@ def detect_fake_job(title, description,
             score += 2
     
 
-    if score == 0:
-        results['risk_level']     = 'LOW'
-        results['recommendation'] = 'SAFE TO APPLY'
-    elif score <= 2:
-        results['risk_level']     = 'MEDIUM'
-        results['is_fake']        = True
-        results['recommendation'] = 'BE CAREFUL — Verify before applying'
-    elif score <= 4:
-        results['risk_level']     = 'HIGH'
-        results['is_fake']        = True
-        results['recommendation'] = 'LIKELY FAKE — Do not apply'
-    else:
-        results['risk_level']     = 'VERY HIGH'
-        results['is_fake']        = True
-        results['recommendation'] = 'DEFINITELY FAKE — Do not apply'
-
-    return results
-
 if __name__ == "__main__":
     print("=" * 50)
     print(" FAKE JOB DETECTOR")
@@ -313,8 +296,8 @@ if __name__ == "__main__":
     print("\n" + "=" * 50)
     print("  DETECTION RESULTS")
     print("=" * 50)
-    print(f"  Risk Level     : {result['risk_level']}")
-    print(f"  Recommendation : {result['recommendation']}")
+    print(f"Final Decision : {result['recommendation']}")
+    print(f"Risk Level     : {result['risk_level']}")
 
     if result['scam_categories']:
         print(f"\n  Scam Categories Found:")
@@ -331,3 +314,26 @@ if __name__ == "__main__":
         print(f"   {result['irrelevant_reason']}")
 
     print("=" * 50)
+
+ml_pred, ml_prob = predict_ml(text)
+
+keyword_score = min(score / 10, 1)
+
+final_score = (0.6 * keyword_score) + (0.4 * ml_prob)
+
+if final_score < 0.3:
+    results['risk_level'] = 'LOW'
+    results['recommendation'] = 'SAFE TO APPLY'
+elif final_score < 0.6:
+    results['risk_level'] = 'MEDIUM'
+    results['recommendation'] = 'BE CAREFUL — Verify before applying'
+elif final_score < 0.8:
+    results['risk_level'] = 'HIGH'
+    results['recommendation'] = 'LIKELY FAKE — Do not apply'
+else:
+    results['risk_level'] = 'VERY HIGH'
+    results['recommendation'] = ' DEFINITELY FAKE — Do not apply'
+
+if results['is_irrelevant']:
+    results['risk_level'] = 'IRRELEVANT'
+    results['recommendation'] = '❗ NOT RELEVANT — Do not apply'
