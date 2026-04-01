@@ -194,41 +194,40 @@ job_categories = {
 }
 
 def detect_fake_job(title, description,
-                            requirements='', benefits='',
-                            company='', user_field=None,
-                            salary='',       
-                            responsibilities=''):   
+                    requirements='', benefits='',
+                    company='', user_field=None,
+                    salary='', responsibilities=''):
 
-    text = (title + ' ' + description + ' ' +      
+    text = (title + ' ' + description + ' ' +
             requirements + ' ' + benefits + ' ' +
             company + ' ' + salary + ' ' +
             responsibilities).lower()
 
     results = {
-        'is_fake'          : False,
-        'risk_level'       : 'LOW',
-        'scam_categories'  : [],
-        'red_flags'        : [],
-        'is_irrelevant'    : False,
+        'risk_level': 'LOW',
+        'scam_categories': [],
+        'red_flags': [],
+        'is_irrelevant': False,
         'irrelevant_reason': '',
-        'recommendation'   : ' SAFE TO APPLY'
+        'recommendation': ''
     }
 
     score = 0
 
     categories = {
-        'Registration/Payment Scam'  : registration_fee_keywords,
-        'Government Job Scam'        : government_job_keywords,
-        'Work From Home Scam'        : work_from_home_keywords,
-        'MLM/Network Marketing Scam' : mlm_keywords,
-        'Fake Company Scam'          : fake_company_keywords,
-        'Visa/Abroad Job Scam'       : visa_job_keywords,
-        'Placement Agency Scam'      : placement_agency_keywords,
-        'Social Media Scam'          : social_media_scam_keywords,
-        'Unrealistic Salary Scam'    : unrealistic_salary_keywords,
-        'Phishing/Personal Info Scam': phishing_keywords
+        'Registration/Payment Scam': registration_fee_keywords,
+        'Government Job Scam': government_job_keywords,
+        'Work From Home Scam': work_from_home_keywords,
+        'MLM Scam': mlm_keywords,
+        'Fake Company Scam': fake_company_keywords,
+        'Visa Scam': visa_job_keywords,
+        'Placement Scam': placement_agency_keywords,
+        'Social Media Scam': social_media_scam_keywords,
+        'Salary Scam': unrealistic_salary_keywords,
+        'Phishing Scam': phishing_keywords
     }
 
+    # -------- KEYWORD DETECTION -------- #
     for category, keywords in categories.items():
         for keyword in keywords:
             if keyword in text:
@@ -238,102 +237,97 @@ def detect_fake_job(title, description,
                     results['red_flags'].append(keyword)
                 score += 1
 
+    # -------- RELEVANCE CHECK -------- #
     if user_field and user_field in job_categories:
-        user_keywords    = job_categories[user_field]
-        job_field_found  = None
-        user_field_match = any(kw in text for kw in user_keywords)
+        user_keywords = job_categories[user_field]
+        job_field_found = None
+        user_match = any(kw in text for kw in user_keywords)
 
-        for field, field_keywords in job_categories.items():
+        for field, keywords in job_categories.items():
             if field != user_field:
-                for kw in field_keywords:
-                    if kw in text:
-                        job_field_found = field
-                        break
+                if any(kw in text for kw in keywords):
+                    job_field_found = field
+                    break
 
-        if job_field_found and not user_field_match:
-            results['is_irrelevant']     = True
+        if job_field_found and not user_match:
+            results['is_irrelevant'] = True
             results['irrelevant_reason'] = (
-                f"You are looking for {user_field} jobs "
-                f"but this appears to be a {job_field_found} job"
+                f"You are looking for {user_field} jobs but this appears to be a {job_field_found} job"
             )
             score += 2
-    
+
+
+    ml_pred, ml_prob = predict_ml(text)
+
+    keyword_score = min(score / 10, 1)
+    final_score = (0.6 * keyword_score) + (0.4 * ml_prob)
+
+    if final_score < 0.3:
+        results['risk_level'] = 'LOW'
+        results['recommendation'] =  'SAFE TO APPLY'
+    elif final_score < 0.6:
+        results['risk_level'] = 'MEDIUM'
+        results['recommendation'] = 'BE CAREFUL — Verify before applying'
+    elif final_score < 0.8:
+        results['risk_level'] = 'HIGH'
+        results['recommendation'] = 'LIKELY FAKE — Do not apply'
+    else:
+        results['risk_level'] = 'VERY HIGH'
+        results['recommendation'] = 'DEFINITELY FAKE — Do not apply'
+
+    if results['is_irrelevant']:
+        results['risk_level'] = 'IRRELEVANT'
+        results['recommendation'] = 'NOT RELEVANT — Do not apply'
+
+    return results
 
 if __name__ == "__main__":
+
     print("=" * 50)
-    print(" FAKE JOB DETECTOR")
+    print(" FAKE JOB DETECTOR (FULL HYBRID)")
     print("=" * 50)
 
-    title            = input("\nEnter job title: ")
-    description      = input("Enter job description: ")
-    requirements     = input("Enter requirements (press Enter to skip): ")
-    benefits         = input("Enter benefits (press Enter to skip): ")
-    company          = input("Enter company name (press Enter to skip): ")
-    salary           = input("Enter salary (press Enter to skip): ")
-    responsibilities = input("Enter responsibilities (press Enter to skip): ")
+    title = input("\nEnter job title: ")
+    description = input("Enter job description: ")
+    requirements = input("Enter requirements: ")
+    benefits = input("Enter benefits: ")
+    company = input("Enter company: ")
+    salary = input("Enter salary: ")
+    responsibilities = input("Enter responsibilities: ")
 
-    print("\nSelect your field (press Enter to skip):")
+    print("\nSelect your field:")
     fields = list(job_categories.keys())
     for i, field in enumerate(fields, 1):
-        print(f"  {i}. {field}")
+        print(f"{i}. {field}")
 
-    choice     = input("\nEnter choice number: ")
-    user_field = None
-    if choice.isdigit() and 1 <= int(choice) <= len(fields):
-        user_field = fields[int(choice) - 1]
+    choice = input("Enter choice: ")
+    user_field = fields[int(choice)-1] if choice.isdigit() else None
 
     result = detect_fake_job(
-        title            = title,
-        description      = description,
-        requirements     = requirements,
-        benefits         = benefits,
-        company          = company,
-        salary           = salary,
-        responsibilities = responsibilities,
-        user_field       = user_field
+        title, description, requirements,
+        benefits, company, user_field,
+        salary, responsibilities
     )
 
     print("\n" + "=" * 50)
-    print("  DETECTION RESULTS")
+    print(" DETECTION RESULTS")
     print("=" * 50)
+
     print(f"Final Decision : {result['recommendation']}")
     print(f"Risk Level     : {result['risk_level']}")
 
     if result['scam_categories']:
-        print(f"\n  Scam Categories Found:")
-        for cat in result['scam_categories']:
-            print(f"   {cat}")
+        print("\nScam Categories:")
+        for c in result['scam_categories']:
+            print("-", c)
 
     if result['red_flags']:
-        print(f"\n  Red Flags Found ({len(result['red_flags'])}):")
-        for flag in result['red_flags'][:10]:
-            print(f"   {flag}")
+        print(f"\nRed Flags ({len(result['red_flags'])}):")
+        for f in result['red_flags'][:10]:
+            print("-", f)
 
     if result['is_irrelevant']:
-        print(f"\n  Relevance Check:")
-        print(f"   {result['irrelevant_reason']}")
+        print("\nRelevance Issue:")
+        print(result['irrelevant_reason'])
 
     print("=" * 50)
-
-ml_pred, ml_prob = predict_ml(text)
-
-keyword_score = min(score / 10, 1)
-
-final_score = (0.6 * keyword_score) + (0.4 * ml_prob)
-
-if final_score < 0.3:
-    results['risk_level'] = 'LOW'
-    results['recommendation'] = 'SAFE TO APPLY'
-elif final_score < 0.6:
-    results['risk_level'] = 'MEDIUM'
-    results['recommendation'] = 'BE CAREFUL — Verify before applying'
-elif final_score < 0.8:
-    results['risk_level'] = 'HIGH'
-    results['recommendation'] = 'LIKELY FAKE — Do not apply'
-else:
-    results['risk_level'] = 'VERY HIGH'
-    results['recommendation'] = ' DEFINITELY FAKE — Do not apply'
-
-if results['is_irrelevant']:
-    results['risk_level'] = 'IRRELEVANT'
-    results['recommendation'] = '❗ NOT RELEVANT — Do not apply'
